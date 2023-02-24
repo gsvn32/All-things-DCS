@@ -1,61 +1,67 @@
-#Group 10 - PA1 - 2023/02/22
-#Worker
-#
-
+import json
 from xmlrpc.server import SimpleXMLRPCServer
 import sys
-import json
 
-global workerdata
+# Storage of data
+data_table = {}
 
-# ben curtis - simple json open/load function
-def load_data(filename):
-    global workerdata
-    f = open(filename)
-    workerdata = json.load(f)
-    return workerdata
 
+def load_data(group):
+    global data_table
+    with open('./data/data-' + group + '.json', 'r') as f:
+        json_data = f.read()
+        data_table = json.loads(json_data)
+    return data_table
 
 
 def getbyname(name):
-    # TODO
-    # ben curtis - added dict search and simple return
-    global workerdata
-    print(f'Client => Asking for person with {name}')
-    if name in workerdata:
-        return workerdata[name]['name']
-    return {
-        'error': False,
-        'result': []
-    }
+
+    try:
+        record = data_table[name]
+        return {
+            'error': False,
+            'result': record
+        }
+    except KeyError:
+        # Handle the case where the name is not found
+        print(f"No record found for name '{name}'")
+        return {
+            'error': False,
+            'result': ['No data found with given name']
+        }
 
 
 def getbylocation(location):
-    # TODO
-    # ben curtis - added dict search and simple return
-    global workerdata
-    print(f'Client => Asking for person lived in {location}')
-    for i in workerdata:
-        if workerdata[i]['location'] == location:
-            print(workerdata[i]['location'])
-            return workerdata[i]
-    else:
-        return {
-            'error': False,
-            'result': []
-        }
 
-def getbyyear(location, year):
-    # TODO
-    # ben curtis - added dict search and simple return
-    global workerdata
-    print(f'Client => Asking for person lived in {location} in {year}')
-    for i in workerdata:
-        if workerdata[i]['location'] == location and workerdata[i]['year'] == year:
-            return workerdata[i]
+    # Create an empty list to store the matching records
+    matching_records = []
+
+    # Iterate over the dictionary and collect the records with the matching location
+    for record in data_table.values():
+        if record['location'] == location:
+            matching_records.append(record)
+
+    # Return the matching records
     return {
         'error': False,
-        'result': []
+        'result': matching_records
+    }
+
+
+def getbyyear(location, year):
+
+    # Create an empty list to store the matching records
+    matching_records = []
+
+    # Iterate over the dictionary and collect the records with the matching location
+    for record in data_table.values():
+        if record['location'] == location and record['year'] == year:
+            matching_records.append(record)
+
+    # Return the matching records
+    return {
+        'error': False,
+        'result': matching_records
     }
 
 
@@ -66,19 +72,13 @@ def main():
 
     port = int(sys.argv[1])
     group = sys.argv[2]
+
+    # Load the data
+    load_data('am')
+
     server = SimpleXMLRPCServer(("localhost", port))
-    print(f"Listening on port {port} {group}...")
+    print(f"Listening on port {port}...")
 
-    # ben curtis - added dict for json data with corresponding load_data function
-    workertable = {
-        'am': './data/data-am.json',
-        'nz': './data/data-nz.json'
-    }
-
-    load_data(workertable[group])
-
-    # TODO register RPC functions
-    # ben curtis - added register functions
     server.register_function(getbylocation, 'getbylocation')
     server.register_function(getbyname, 'getbyname')
     server.register_function(getbyyear, 'getbyyear')
