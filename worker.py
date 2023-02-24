@@ -74,7 +74,7 @@ def main():
     group = sys.argv[2]
 
     # Load the data
-    load_data('am')
+    load_data(group)
 
     server = SimpleXMLRPCServer(("localhost", port))
     print(f"Listening on port {port}...")
