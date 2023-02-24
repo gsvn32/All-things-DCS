@@ -25,8 +25,15 @@ def getbylocation(location):
     worker= 'worker-nz'
     proxy2= xmlrpc.client.ServerProxy(f"http://localhost:{workers[worker]}/")    
     result2 = proxy2.getbylocation(location)
-    
-    return result1+result2
+    if result1["error"] and result2["error"]:
+        return "No data found with given inputs"
+    elif result1["error"]:
+        return result2["result"]
+    elif result2["error"]:
+        return result1["result"]
+    else:
+        return result1["result"]+result2["result"]
+        
 
 
 def getbyname(name):
@@ -57,6 +64,15 @@ def getbyyear(location, year):
     worker= 'worker-nz'
     proxy2= xmlrpc.client.ServerProxy(f"http://localhost:{workers[worker]}/")    
     result2 = proxy2.getbyyear(location, year)
+    
+    if result1["error"] and result2["error"]:
+        return "No data found with given inputs"
+    elif result1["error"]:
+        return result2["result"]
+    elif result2["error"]:
+        return result1["result"]
+    else:
+        return result1["result"]+result2["result"]
     
 
 
