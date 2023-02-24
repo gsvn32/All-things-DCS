@@ -26,7 +26,7 @@ def getbyname(name):
         # Handle the case where the name is not found
         print(f"No record found for name '{name}'")
         return {
-            'error': False,
+            'error': True,
             'result': ['No data found with given name']
         }
 
