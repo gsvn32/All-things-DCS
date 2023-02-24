@@ -72,8 +72,8 @@ def main():
 
     # ben curtis - added dict for json data with corresponding load_data function
     workertable = {
-        'am': 'C:/Users/curtisb/PycharmProjects/PA1/data-am.json',
-        'nz': 'C:/Users/curtisb/PycharmProjects/PA1/data-nz.json'
+        'am': '/mnt/c/Users/venka/cources/First sem/DCS/PA1/DCOMP-PA1/data/data-am.json',
+        'nz': '/mnt/c/Users/venka/cources/First sem/DCS/PA1/DCOMP-PA1/data/data-nz.json'
     }
 
     load_data(workertable[group])
