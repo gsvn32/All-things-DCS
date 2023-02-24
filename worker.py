@@ -1,6 +1,5 @@
 #Group 10 - PA1 - 2023/02/22
-#Worker 1 - (same as worker 2)
-#
+#Worker
 #
 
 from xmlrpc.server import SimpleXMLRPCServer
@@ -72,8 +71,8 @@ def main():
 
     # ben curtis - added dict for json data with corresponding load_data function
     workertable = {
-        'am': '/mnt/c/Users/venka/cources/First sem/DCS/PA1/DCOMP-PA1/data/data-am.json',
-        'nz': '/mnt/c/Users/venka/cources/First sem/DCS/PA1/DCOMP-PA1/data/data-nz.json'
+        'am': './data/data-am.json',
+        'nz': './data/data-nz.json'
     }
 
     load_data(workertable[group])
