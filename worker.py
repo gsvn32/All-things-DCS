@@ -26,7 +26,7 @@ def getbyname(name):
         # Handle the case where the name is not found
         print(f"No record found for name '{name}'")
         return {
-            'error': False,
+            'error': True,
             'result': ['No data found with given name']
         }
 
@@ -74,7 +74,7 @@ def main():
     group = sys.argv[2]
 
     # Load the data
-    load_data('am')
+    load_data(group)
 
     server = SimpleXMLRPCServer(("localhost", port))
     print(f"Listening on port {port}...")
