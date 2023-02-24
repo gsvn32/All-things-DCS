@@ -48,7 +48,11 @@ def getbyname(name):
     proxy= xmlrpc.client.ServerProxy(f"http://localhost:{workers[worker]}/")
     result = proxy.getbyname(name)
     print(f'The returned result = {proxy.getbyname(name)}')
-    return result
+    if result["error"]:
+        return result["result"]
+    else:
+        return result["result"]
+    
 
 
 def getbyyear(location, year):
