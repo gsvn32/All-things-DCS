@@ -3,12 +3,12 @@ import queue
 import threading
 from xmlrpc.server import SimpleXMLRPCServer
 import sys
-
+import time
 # Storage of data
 data_table = {}
 
 # Request queue
-request_queue = queue.Queue(maxsize=20)
+request_queue = queue.Queue(maxsize=2)
 
 def load_data(group):
     global data_table
@@ -21,18 +21,21 @@ def process_request(request):
     # Process the request here
     method = request['method']
     args = request['args']
-    print("************* " + args)
+    print(args)
+    time.sleep(2)
     if method == 'getbyname':
         return getbyname(args)
     elif method == 'getbylocation':
-        return getbylocation(*args)
+        return getbylocation(args)
     elif method == 'getbyyear':
-        return getbyyear(*args)
+        return getbyyear(args[0],args[1])
 
 def request_worker():
     while True:
         request = request_queue.get()
+        print(request)
         result = process_request(request)
+        print(result)
         request['response'].put(result)
         request_queue.task_done()
 
@@ -55,12 +58,16 @@ def handle_request(method, args):
 
     # Wait for the response
     response = response_queue.get()
+    print("in here")
+
+    print("out here")
+    print(response)
     response_queue.task_done()
 
     if response['error']:
         return 'Queue is full'
     else:
-        return response['result']
+        return response
 
 def is_queue_full():
     return request_queue.full()
