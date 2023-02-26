@@ -1,25 +1,25 @@
 #Group 10 - PA1 - 2023/02/22
 #Master server
 #
+#
 import xmlrpc.client
 from xmlrpc.server import SimpleXMLRPCServer
 import sys
 import subprocess
-import socket
-from contextlib import closing
 import psutil
-
 # Restrict to a particular path.
 active_workers = {
     'worker-am': "23001",
     'worker-nz': "23002"
 }
 
+
 def find_free_port():
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+	
 def is_not_alive(group):
     # Get a list of all running processes
     for process in psutil.process_iter():
@@ -39,10 +39,13 @@ def is_not_alive(group):
     #else:
     #Process is not running
     return True
+
+
 def create_process(port,group):
     # Replace "command" with the command you want to run
     command = "python3 worker.py "+str(port)+" "+group
     print("creating new process with '"+command+"'")
+
     # Start the process
     process = subprocess.Popen(command, shell=True)   
 workers= {
@@ -54,6 +57,7 @@ def is_qfull(port):
     temps=xmlrpc.client.ServerProxy(f"http://localhost:{port}/")
     print("is queue full at "+str(port)+" "+str(temps.is_queue_full()))
     return temps.is_queue_full()
+
 def check_proc_status():
     if is_not_alive('am'):
         create_process(23001,"am")
@@ -102,7 +106,7 @@ class Query:
                 self.worker= 'worker-nz'
             self.proxy= xmlrpc.client.ServerProxy(f"http://localhost:{active_workers[self.worker]}/")
             print(f"http://localhost:{active_workers[self.worker]}/")
-            self.result = self.proxy.handle_request(getbyname,self.name)
+            self.result = self.proxy.handle_request('getbyname',self.name)
             print(f'The returned result = {self.result}')    
             return self.result["result"]
             
@@ -112,11 +116,11 @@ class Query:
             #Results from worker-am
             self.worker= 'worker-am'
             self.proxy1= xmlrpc.client.ServerProxy(f"http://localhost:{active_workers[self.worker]}/")
-            self.result1 = self.proxy1.getbylocation(self.location)   
+            self.result1 = self.proxy1.handle_request('getbylocation',self.location)   
             #Results from worker-nz
             self.worker= 'worker-nz'
             self.proxy2= xmlrpc.client.ServerProxy(f"http://localhost:{active_workers[self.worker]}/") 
-            self.result2 = self.proxy2.getbylocation(self.location)    
+            self.result2 = self.proxy2.handle_request('getbylocation',self.location)    
             #Error handling
             if self.result1["error"] and self.result2["error"]:
                 return "No data found with given inputs"
@@ -132,12 +136,12 @@ class Query:
             #Results from worker-am
             self.worker= 'worker-am'
             self.proxy1= xmlrpc.client.ServerProxy(f"http://localhost:{active_workers[self.worker]}/")
-            self.result1 = self.proxy1.getbyyear(self.location, self.year)
+            self.result1 = self.proxy1.handle_request('getbyyear',[self.location, self.year])
             
             #Results from worker-nz
             self.worker= 'worker-nz'
             self.proxy2= xmlrpc.client.ServerProxy(f"http://localhost:{active_workers[self.worker]}/")    
-            self.result2 = self.proxy2.getbyyear(self.location, self.year)
+            self.result2 = self.proxy2.handle_request('getbyyear',[self.location, self.year])
             
             #Error handling
             if self.result1["error"] and self.result2["error"]:
@@ -151,34 +155,39 @@ class Query:
                 
 
         
+
+
 def getbyname(name):
     query1=Query(1,[name,2000])
     query1.say_hello()
     return query1.process_req()
+
     
 def getbylocation(location):
     query1=Query(2,[location,2000])
     query1.say_hello()
     return query1.process_req()
-    
+
 def getbyyear(location, year):
     query1=Query(3,[location,year])
     query1.say_hello()
     return query1.process_req()
-    
+
+
+
 def main():
     port = int(sys.argv[1])
     server = SimpleXMLRPCServer(("localhost", port))
-    print(f"Listening on port {port}...")
-    
-    print("checking worker status.....")
     check_proc_status()
-    print("Workers online now.....")
-    #Register master functions
+    print(f"Listening on port {port}...")
+
+    # TODO: register RPC functions
+    # ben curtis - added register functions
     server.register_function(getbylocation, 'getbylocation')
     server.register_function(getbyname, 'getbyname')
     server.register_function(getbyyear, 'getbyyear')
     server.serve_forever()
+
 
 if __name__ == '__main__':
     main()
