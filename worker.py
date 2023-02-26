@@ -21,8 +21,9 @@ def process_request(request):
     # Process the request here
     method = request['method']
     args = request['args']
+    print("************* " + args)
     if method == 'getbyname':
-        return getbyname(*args)
+        return getbyname(args)
     elif method == 'getbylocation':
         return getbylocation(*args)
     elif method == 'getbyyear':
@@ -137,6 +138,7 @@ def main():
     server.register_function(getbyname, 'getbyname')
     server.register_function(getbyyear, 'getbyyear')
     server.register_function(is_queue_full, 'is_queue_full')
+    server.register_function(handle_request, 'handle_request')
     server.serve_forever()
 
 
