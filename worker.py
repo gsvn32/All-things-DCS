@@ -66,10 +66,7 @@ def handle_request(method, args):
             print(response)
             response_queue.task_done()
 
-            if response['error']:
-                return 'Queue is full'
-            else:
-                return response
+            return response
     	
 
 def is_queue_full():
@@ -100,7 +97,12 @@ def getbylocation(location):
     for record in data_table.values():
         if record['location'].casefold() == location.casefold():
             matching_records.append(record)
-
+    
+    if matching_records == []:
+        return {
+        'error': True,
+        'result': 'No matching recoreds'
+        }
     # Return the matching records
     return {
         'error': False,
@@ -117,7 +119,11 @@ def getbyyear(location, year):
     for record in data_table.values():
         if record['location'].casefold() == location.casefold() and record['year'] == year:
             matching_records.append(record)
-
+    if matching_records == []:
+        return {
+        'error': True,
+        'result': 'No matching recoreds'
+        }
     # Return the matching records
     return {
         'error': False,
