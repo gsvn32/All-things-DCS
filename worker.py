@@ -9,7 +9,7 @@ import asyncio
 data_table = {}
 
 # Request queue
-request_queue = queue.Queue(maxsize=2)
+request_queue = queue.Queue(maxsize=20)
 
 def load_data(group):
     global data_table
@@ -18,7 +18,7 @@ def load_data(group):
         data_table = json.loads(json_data)
     return data_table
 
-async def process_request(request):
+def process_request(request):
     # Process the request here
     method = request['method']
     args = request['args']
@@ -30,16 +30,16 @@ async def process_request(request):
     elif method == 'getbyyear':
         return getbyyear(args[0],args[1])
 
-async def request_worker():
+def request_worker():
     while True:
         request = request_queue.get()
         print(request)
-        result = await process_request(request)
+        result =  process_request(request)
         print(result)
         request['response'].put(result)
         request_queue.task_done()
 
-async def handle_request(method, args):
+def handle_request(method, args):
     # Create a new queue to hold the response
     response_queue = queue.Queue()
 
@@ -70,7 +70,7 @@ async def handle_request(method, args):
                 return 'Queue is full'
             else:
                 return response
-    	await asyncio.sleep(1)
+    	
 
 def is_queue_full():
     return request_queue.full()
@@ -125,7 +125,7 @@ def getbyyear(location, year):
     }
 
 
-async def main():
+def main():
     if len(sys.argv) < 3:
         print('Usage: worker.py <port> <group: am or nz>')
         sys.exit(0)
@@ -135,22 +135,18 @@ async def main():
 
     # Load the data
     load_data(group)
-
-    # Start the request worker coroutine
-    request_worker_coroutine = asyncio.create_task(request_worker())
-
+    
     server = SimpleXMLRPCServer(("localhost", port))
     print(f"Listening on port {port}...")
-
-    server.register_function(getbylocation, 'getbylocation')
-    server.register_function(getbyname, 'getbyname')
-    server.register_function(getbyyear, 'getbyyear')
+    
+    # Start the request worker thread
+    t = threading.Thread(target=request_worker)
+    t.daemon = True
+    t.start()
     server.register_function(is_queue_full, 'is_queue_full')
     server.register_function(handle_request, 'handle_request')
     server.serve_forever()
 
-    # Wait for the request worker coroutine to complete
-    await request_worker_coroutine
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
