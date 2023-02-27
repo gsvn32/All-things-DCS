@@ -82,11 +82,5 @@
         "name": "niko",
         "location": "Kansas City",
         "year": 2001
-    },
-	"nikhil": {
-        "record_id": 14,
-        "name": "nikhil",
-        "location": "Kurnool",
-        "year": 1997
     }
 }
