@@ -26,15 +26,13 @@ def process_request(request):
     method = request['method']
     args = request['args']
 
-    # Define a switch statement that maps the method to the corresponding function
-    switcher = {
-        'getbyname': getbyname(args),
-        'getbylocation': getbylocation(args),
-        'getbyyear': getbyyear(args[0], args[1]),
-    }
-
-    # Call the function corresponding to the method and return the result
-    return switcher.get(method, "Invalid method")
+    # Define if else conditions that maps the method to the corresponding function
+    if method == 'getbyname':
+        return getbyname(args)
+    elif method == 'getbylocation':
+        return getbylocation(args)
+    elif method == 'getbyyear':
+        return getbyyear(args[0], args[1])
 
 
 # Thread function for processing requests in the queue
