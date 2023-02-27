@@ -202,19 +202,16 @@ class Query:
 
 # Request is processed here by mapping to the respective method.
 def process_request(request):
-    # Extract the method and args from the request dictionary
+    # Process the request here
     method = request['method']
     args = request['args']
-
-    # Define a switch statement that maps the method to the corresponding function
-    switcher = {
-        'getbyname': getbyname(args),
-        'getbylocation': getbylocation(args),
-        'getbyyear': getbyyear(args[0], args[1]),
-    }
-
-    # Call the function corresponding to the method and return the result
-    return switcher.get(method, "Invalid method")
+    print(args)
+    if method == 'getbyname':
+        return getbyname(args)
+    elif method == 'getbylocation':
+        return getbylocation(args)
+    elif method == 'getbyyear':
+        return getbyyear(args[0], args[1])
 
 
 def request_worker():
