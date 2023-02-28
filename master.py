@@ -44,8 +44,9 @@ def is_not_alive(group):
                 if temp[1] == 'worker.py' and temp[3] == group:
                     return False
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
             # Handle any exceptions that might occur while accessing the process information
-            print("Either psutil AccessDenied or psutil ZombieProcess")
+            #print("Either psutil AccessDenied or psutil ZombieProcess")
 
     # If no process with the specified group is running, return True
     return True
