@@ -1,0 +1,57 @@
+{
+  "id1": {
+    "name": "World",
+    "subscribers": []
+  },
+  "id2": {
+    "name": "US",
+    "subscribers": [
+      "subscriber1"
+    ]
+  },
+  "id3": {
+    "name": "Politics",
+    "subscribers": [
+      "subscriber1",
+      "subscriber2"
+    ]
+  },
+  "id4": {
+    "name": "Economy",
+    "subscribers": [
+      "subscriber1",
+      "subscriber2",
+      "subscriber3"
+    ]
+  },
+  "id5": {
+    "name": "Business",
+    "subscribers": [
+      "subscriber1",
+      "subscriber2",
+      "subscriber3",
+      "subscriber4"
+    ]
+  },
+  "id6": {
+    "name": "Tech",
+    "subscribers": [
+      "subscriber2",
+      "subscriber3",
+      "subscriber4"
+    ]
+  },
+  "id7": {
+    "name": "Markets",
+    "subscribers": [
+      "subscriber3",
+      "subscriber4"
+    ]
+  },
+  "id8": {
+    "name": "Sports",
+    "subscribers": [
+      "subscriber4"
+    ]
+  }
+}
