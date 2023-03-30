@@ -1,0 +1,57 @@
+{
+  "id1": {
+    "name": "Breaking COBOL news",
+    "subscribers": []
+  },
+  "id2": {
+    "name": "Distributed Computing News",
+    "subscribers": [
+      "subscriber1"
+    ]
+  },
+  "id3": {
+    "name": "Big Data News",
+    "subscribers": [
+      "subscriber1",
+      "subscriber2"
+    ]
+  },
+  "id4": {
+    "name": "Quantum Computing News",
+    "subscribers": [
+      "subscriber1",
+      "subscriber2",
+      "subscriber3"
+    ]
+  },
+  "id5": {
+    "name": "Artificial Intelligence News",
+    "subscribers": [
+      "subscriber1",
+      "subscriber2",
+      "subscriber3",
+      "subscriber4"
+    ]
+  },
+  "id6": {
+    "name": "Cloud Computing News",
+    "subscribers": [
+      "subscriber2",
+      "subscriber3",
+      "subscriber4"
+    ]
+  },
+  "id7": {
+    "name": "Cybersecurity News",
+    "subscribers": [
+      "subscriber3",
+      "subscriber4"
+    ]
+  },
+  "id8": {
+    "name": "Internet of Things",
+    "subscribers": [
+      "subscriber4"
+    ]
+  }
+}
