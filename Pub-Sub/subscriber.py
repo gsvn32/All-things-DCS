@@ -11,9 +11,9 @@ user = {'name':"",
 		'uname':"",
 		'token':""
 		}
-class NewsletterApp(tk.Tk):
+class SubscriberClient(tk.Tk):
 	
-	# __init__ function for class NewsletterApp
+	# __init__ function for class SubscriberClient
 	def __init__(self, *args, **kwargs):
 		# __init__ function for class Tk
 		tk.Tk.__init__(self, *args, **kwargs)
@@ -156,5 +156,5 @@ class MainPage(tk.Frame):
 		self.tooltip_l.config(text=name+" "+token,foreground="red")
 		
 # Driver Code
-app = NewsletterApp()
+app = SubscriberClient()
 app.mainloop()

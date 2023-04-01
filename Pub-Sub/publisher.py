@@ -10,9 +10,9 @@ user = {'name':"",
 		'uname':"",
 		'token':""
 		}
-class NewsletterApp(tk.Tk):
+class PublisherClient(tk.Tk):
 	
-	# __init__ function for class NewsletterApp
+	# __init__ function for class PublisherClient
 	def __init__(self, *args, **kwargs):
 		# __init__ function for class Tk
 		tk.Tk.__init__(self, *args, **kwargs)
@@ -54,7 +54,7 @@ class NewsletterApp(tk.Tk):
 				user['uname'] = response_data['uname']
 				user['token'] = response_data['token']				
 				self.show_frame(MainPage)
-				self.frames[MainPage].write_uname(user['name'],user['token'])
+				self.frames[MainPage].write_uname(user['name'])
 			else:
 				self.frames[LoginPage].write_error(response_data['message'])
 		except:
@@ -144,17 +144,24 @@ class MainPage(tk.Frame):
 	def __init__(self, parent, controller):
 		tk.Frame.__init__(self, parent)
 		#Heading
-		ttk.Label(self, text ="Main Page", font = LARGEFONT).grid(row = 0, columnspan=1)	
+		ttk.Label(self, text ="Main Page", font = LARGEFONT).grid(row = 0, column=0,sticky = "nswe")	
 		#entries
-		ttk.Button(self, text="LogOut",command = lambda : controller.show_frame(LoginPage)).grid(row = 1, column = 1, padx = 10, pady = 10)
+		self.tooltip_l = ttk.Label(self,font = ("Verdana", 20))
+		self.tooltip_l.grid(row = 1, column = 0, padx = 10, pady = 10,sticky = "nsew")
+		text_m = tk.Text(self, wrap=None)
+		text_m.grid(row = 2, column = 0,sticky='nsew')
+
+		yscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=text_m.yview)
+		yscrollbar.grid(row=2, column=1, sticky='nsw')
+		text_m.configure(yscrollcommand=yscrollbar.set)
+		ttk.Button(self, text="LogOut",command = lambda : controller.show_frame(LoginPage)).grid(row = 0, column = 1, padx = 10, pady = 10)
 		ttk.Button(self, text="Publish",
-		command = lambda : controller.publish_req()).grid(row = 2, column = 1, padx = 10, pady = 10)
-		self.tooltip_l = ttk.Label(self)
-		self.tooltip_l.grid(row = 6, column = 0, padx = 10, pady = 10)
+		command = lambda : controller.publish_req()).grid(row = 6, column = 0, padx = 10, pady = 10)
 		
-	def write_uname(self,name,token):
-		self.tooltip_l.config(text=name+" "+token,foreground="red")
+		
+	def write_uname(self,name):
+		self.tooltip_l.config(text="Welcome "+name,foreground="red")
 		
 # Driver Code
-app = NewsletterApp()
+app = PublisherClient()
 app.mainloop()

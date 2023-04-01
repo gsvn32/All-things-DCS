@@ -71,7 +71,7 @@ def action_login(uname,passwd):
 	#Process user if found
 	user_records = get_user_credentials(uname,passwd)
 	print(user_records)
-	if user_records is None:
+	if user_records is None or user_records[0]=='':
 		response_data = {'error':True,'message': 'Invalid credentails'}			
 	else:
 		timestamp = int(time.time())
