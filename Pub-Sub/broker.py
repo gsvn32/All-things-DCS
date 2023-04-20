@@ -4,7 +4,6 @@ Created on Wed Apr 19 12:08:05 2023
 
 @author: gsvn32
 """
-
 import json
 import threading
 import queue
@@ -19,7 +18,6 @@ my_q = queue.Queue()
 
 # retrieve the subs for a Topic given the topic name
 def get_subs(name):
-	print(name)
 	with sqlite3.connect('data/topics.db') as conn:
 		cursor = conn.execute('SELECT subscribers FROM topics WHERE name = ?', (str(name),))
 		result = cursor.fetchone()
@@ -72,9 +70,9 @@ def process_message():
 			# Create a JSON object
 			data['content'] = msg_dic['content']
 			data['subs'] = subs
-			
+			data['pubName'] = msg_dic['uname']
 			json_data = json.dumps(data)
-			
+			print(f'Recieved {json_data}')
 			# Send the JSON object to the notify service
 			sock.send(json_data.encode())
 			

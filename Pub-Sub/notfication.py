@@ -4,7 +4,6 @@ Created on Wed Apr 19 12:08:05 2023
 
 @author: gsvn32
 """
-
 import json
 import threading
 import queue
@@ -15,7 +14,6 @@ port=9000
 host='localhost'
 # Create a message queue named 'my_q'
 my_q = queue.Queue()
-
 # retrieve the name,email for a user given their uname
 def get_user_info(uname):
     with sqlite3.connect('data/user_db.db') as conn:
@@ -24,12 +22,9 @@ def get_user_info(uname):
         return result
 	
 def send_email(name, email,content):
+	print(f'Name: {name}\nEmail:{email}\ncontent: {content}')
 	# Email settings
-	print(name)
-	print(email)
-	print(content)
-
-	sender_email = 'nikhilgangisetty222@gmail.com' # Enter sender email address
+	sender_email = 'nikhilgangisetty22@gmail.com' # Enter sender email address
 	sender_password = 'vpmuaocxhyjmeopp' # Enter sender email password
 	receiver_email = email # Enter receiver email address
 	message = f'Subject: Notification\n\nHello {name}\n\n' + content
@@ -40,10 +35,9 @@ def send_email(name, email,content):
 			smtp.ehlo()
 			smtp.login(sender_email,sender_password)
 			smtp.sendmail(sender_email, receiver_email, message)
+			print('sent email')
 	except Exception as e:
 		print('Error sending email to', e)
-
- 
 
 
 # Define a function to handle incoming message
@@ -81,7 +75,7 @@ def process_message():
 		try:
 			# Get data from the message queue
 			msg_dic = dict(my_q.get(block=True, timeout=1))
-			# Process the message
+			#Notify subscriber
 			for i in msg_dic['subs']:
 				user_records = get_user_info(i)
 				if user_records is None or user_records[0]=='':
@@ -90,6 +84,9 @@ def process_message():
 				else:
 					#send email to sub
 					send_email(user_records[0],user_records[1], msg_dic['content'])
+			#Notify publisher
+			user_records = get_user_info(msg_dic['pubName'])
+			send_email(user_records[0],user_records[1], f"Notified {len(msg_dic['subs'])} Subscriber(s)")
 		except queue.Empty:
 			pass
 
@@ -104,6 +101,3 @@ msg_processing_thread.start()
 # Wait for both threads to finish their jobs
 tcp_listener_thread.join()
 msg_processing_thread.join()
-
-
-
