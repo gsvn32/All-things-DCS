@@ -3,7 +3,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import time
 import sqlite3
-
+port=25678
+host='localhost'
 def create_database():
 	with sqlite3.connect('data/user_db.db') as conn:
 		   conn.execute('''CREATE TABLE IF NOT EXISTS users 
@@ -90,7 +91,7 @@ def action_register(name,uname,passwd,email):
 		response_data = {'error':True,'message': 'Username/Email alread Exists'}	
 	return 	response_data
 # create the server object
-server = HTTPServer(('localhost', 25678), MyServer)
+server = HTTPServer((host, port), MyServer)
 
 # start the server
 print('Starting server...')

@@ -1,8 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 19 12:08:05 2023
+
+@author: gsvn32
+"""
+
 import tkinter as tk
 from tkinter import ttk
 #Imports for Http proto
 import requests
 import json
+import socket
+port=8000
+host='localhost'
 LARGEFONT =("Verdana", 35)
 
 user = {'name':"",
@@ -80,8 +90,22 @@ class PublisherClient(tk.Tk):
 		except:
 			self.frames[RegisterPage].write_error("something went wrong!!, Please try after some time")
 		
-	def publish_req(self):
-		pass
+	#Publish to broker
+	def publish_req(self,content,topic):
+		# Create a TCP connection to the receiver
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.connect((host, port))
+		
+		# Create a JSON object
+		user['content'] = content
+		user['topic'] = topic
+		json_data = json.dumps(user)
+		
+		# Send the JSON object to the receiver
+		sock.send(json_data.encode())
+		
+		# Close the connection
+		sock.close()
 	def somethinf():
 		pass
 
@@ -156,7 +180,7 @@ class MainPage(tk.Frame):
 		text_m.configure(yscrollcommand=yscrollbar.set)
 		ttk.Button(self, text="LogOut",command = lambda : controller.show_frame(LoginPage)).grid(row = 0, column = 1, padx = 10, pady = 10)
 		ttk.Button(self, text="Publish",
-		command = lambda : controller.publish_req()).grid(row = 6, column = 0, padx = 10, pady = 10)
+		command = lambda : controller.publish_req(text_m.get("1.0",'end-1c'),'World')).grid(row = 6, column = 0, padx = 10, pady = 10)
 		
 		
 	def write_uname(self,name):
@@ -165,3 +189,4 @@ class MainPage(tk.Frame):
 # Driver Code
 app = PublisherClient()
 app.mainloop()
+
