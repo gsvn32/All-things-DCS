@@ -71,6 +71,8 @@ def process_message():
 			data['content'] = msg_dic['content']
 			data['subs'] = subs
 			data['pubName'] = msg_dic['uname']
+			data['topic'] = msg_dic['topic']
+			data['title'] = msg_dic['title']
 			json_data = json.dumps(data)
 			print(f'Recieved {json_data}')
 			# Send the JSON object to the notify service

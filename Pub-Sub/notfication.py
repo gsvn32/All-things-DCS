@@ -21,13 +21,13 @@ def get_user_info(uname):
         result = cursor.fetchone()
         return result
 	
-def send_email(name, email,content):
-	print(f'Name: {name}\nEmail:{email}\ncontent: {content}')
+def send_email(name, email,content,title):
+	print(f'Name: {name}\nEmail:{email}\ncontent: {content}\ntitle: {title}')
 	# Email settings
 	sender_email = 'nikhilgangisetty22@gmail.com' # Enter sender email address
 	sender_password = 'vpmuaocxhyjmeopp' # Enter sender email password
 	receiver_email = email # Enter receiver email address
-	message = f'Subject: Notification\n\nHello {name}\n\n' + content
+	message = f'Subject: {title}\n\nHello {name}\n\n' + content
 	# Sending email
 	try:
 		with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
@@ -83,10 +83,10 @@ def process_message():
 					pass
 				else:
 					#send email to sub
-					send_email(user_records[0],user_records[1], msg_dic['content'])
+					send_email(user_records[0],user_records[1], msg_dic['content'],msg_dic['title'])
 			#Notify publisher
 			user_records = get_user_info(msg_dic['pubName'])
-			send_email(user_records[0],user_records[1], f"Notified {len(msg_dic['subs'])} Subscriber(s)")
+			send_email(user_records[0],user_records[1], f"Notified {len(msg_dic['subs'])} Subscriber(s) for {msg_dic['title']}",msg_dic['title'])
 		except queue.Empty:
 			pass
 
