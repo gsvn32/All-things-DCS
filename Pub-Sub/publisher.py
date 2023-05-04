@@ -13,7 +13,7 @@ import requests
 import json
 import socket
 import sqlite3
-port=8000
+
 host='localhost'
 LARGEFONT =("Verdana", 35)
 
@@ -28,6 +28,19 @@ def get_subs():
 		cursor = conn.execute('SELECT name FROM topics')
 		result = cursor.fetchall()
 		return result
+# retrieve the broker information
+def broker_info(topic):
+    with sqlite3.connect('data/brokers.db') as conn:
+        cursor = conn.execute('SELECT port FROM brokers WHERE topic=?',(topic,))
+        result = cursor.fetchone()
+        return result
+# retrieve the broker information
+def all_brokers_info():
+    with sqlite3.connect('data/brokers.db') as conn:
+        cursor = conn.execute('SELECT * FROM brokers')
+        result = cursor.fetchall()
+        return result
+
 topic_list = list(get_subs())
 for i in range(len(topic_list)):
 	topic_list[i]=topic_list[i][0]
@@ -105,24 +118,30 @@ class PublisherClient(tk.Tk):
 		
 	#Publish to broker
 	def publish_req(self,content,topic,title):
-		# Create a TCP connection to the receiver
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect((host, port))
-		
-		# Create a JSON object
-		user['content'] = content
-		user['topic'] = topic
-		user['title'] = title
-		print(user)
-		json_data = json.dumps(user)
-		
-		# Send the JSON object to the receiver
-		sock.send(json_data.encode())
-		
-		# Close the connection
-		sock.close()
-	def somethinf():
-		pass
+		print(all_brokers_info())
+		print(topic)
+		b_port = int(broker_info(topic)[0])
+		print(b_port)
+		if b_port != 0:	
+			# Create a TCP connection to the receiver
+			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			sock.connect((host, b_port))
+			
+			# Create a JSON object
+			user['content'] = content
+			user['topic'] = topic
+			user['title'] = title
+			print(user)
+			json_data = json.dumps(user)
+			
+			# Send the JSON object to the receiver
+			sock.send(json_data.encode())
+			
+			# Close the connection
+			sock.close()
+		else:
+			self.frames[MainPage].notifyevent_m("Please try after some time")
+
 	
 #LoginPage
 class LoginPage(tk.Frame):
@@ -189,7 +208,7 @@ class MainPage(tk.Frame):
 		#entries
 		self.search_box = ttk.Entry(self,font = ("Verdana", 12),textvariable=self.search_box_var)
 		self.search_box.pack(side="top")
-		
+	
 		# Create the listbox to display search results
 		self.results_box = tk.Listbox(self,yscrollcommand=True,height=2,selectmode=tk.SINGLE)
 		self.results_box.pack(expand=0)
@@ -203,9 +222,12 @@ class MainPage(tk.Frame):
 		ttk.Button(self, text="Publish",
 		command = lambda : controller.publish_req(self.text_m.get("1.0",'end-1c'),self.results_box.get(self.results_box.curselection()),self.title_m.get())).pack(side="right")
 		
+		self.notify_m = ttk.Label(self,font = ("Verdana", 15))
+		self.notify_m.pack(side="bottom")
+		
 		# Bind the StringVar variable to the search function
 		self.search_box_var.trace('w', self.update_search_results)
-
+		
 	
 	def update_search_results(self, *args):
 	    # Get the search string from the search box variable
@@ -225,6 +247,8 @@ class MainPage(tk.Frame):
 		
 	def write_uname(self,name):
 		self.tooltip_l.config(text="Welcome "+name,foreground="red")
+	def notifyevent_m(self,msg):
+		self.notify_m.config(text=msg,foreground="red")
 		
 # Driver Code
 app = PublisherClient()

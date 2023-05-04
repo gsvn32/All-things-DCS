@@ -9,11 +9,25 @@ import threading
 import queue
 import socket
 import sqlite3
-broker_port=8000
+import time
+#global variables
 broker_host='localhost'
 notify_port=9000
 notify_host='localhost'
 # Create a message queue named 'my_q'
+
+import xmlrpc.client
+
+# Register broker to topics
+try:
+    with xmlrpc.client.ServerProxy("http://localhost:8000/") as proxy:
+
+        # Call the remote re_topic() function
+        broker_port = proxy.reg_topic()
+        print(f"Broker registered on port: {broker_port}")
+except xmlrpc.client.ProtocolError as error:
+    print("ProtocolError: {}".format(error))
+
 my_q = queue.Queue()
 
 # retrieve the subs for a Topic given the topic name
@@ -45,13 +59,26 @@ def handle_data(sock):
 
 # Define a thread to listen for incoming messages
 def tcp_listener():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind((broker_host, broker_port))
-    sock.listen(1)
-    while True:
-        conn, addr = sock.accept()
-        threading.Thread(target=handle_data, args=(conn,)).start()
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.bind((broker_host, broker_port))
+	print(f"Sratred TCP Listener on: {broker_port}")
+	sock.listen(1)
+	while True:
+		conn, addr = sock.accept()
+		threading.Thread(target=handle_data, args=(conn,)).start()
 
+
+	
+def send_heartbeat():
+	global broker_port
+	while True:
+		time.sleep(5)  #
+		try:
+			with xmlrpc.client.ServerProxy("http://localhost:8000/") as proxy:
+				#Call the remote pow() function
+				proxy.reg_heartbeat(broker_port)
+		except:
+			print("Unable to send heartbeat")
 # Define a function to process the messages in the message queue
 def process_message():
 	while True:
@@ -90,6 +117,9 @@ tcp_listener_thread.start()
 # Start the message processing thread
 msg_processing_thread = threading.Thread(target=process_message, daemon=True)
 msg_processing_thread.start()
+
+# Start the heartbeat thread
+threading.Thread(target=send_heartbeat, daemon=True).start()
 
 # Wait for both threads to finish their jobs
 tcp_listener_thread.join()
