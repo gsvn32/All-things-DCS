@@ -1,8 +1,20 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Apr 19 12:08:05 2023
+
+@author: gsvn32
+"""
+
 import tkinter as tk
 from tkinter import ttk
+from tkinter import scrolledtext
 #Imports for Http proto
 import requests
 import json
+import socket
+import sqlite3
+
+host='localhost'
 LARGEFONT =("Verdana", 35)
 
 user = {'name':"",
@@ -10,8 +22,32 @@ user = {'name':"",
 		'uname':"",
 		'token':""
 		}
+# retrieve the subs for a Topic given the topic name
+def get_subs():
+	with sqlite3.connect('data/topics.db') as conn:
+		cursor = conn.execute('SELECT name FROM topics')
+		result = cursor.fetchall()
+		return result
+# retrieve the broker information
+def broker_info(topic):
+    with sqlite3.connect('data/brokers.db') as conn:
+        cursor = conn.execute('SELECT port FROM brokers WHERE topic=?',(topic,))
+        result = cursor.fetchone()
+        return result
+# retrieve the broker information
+def all_brokers_info():
+    with sqlite3.connect('data/brokers.db') as conn:
+        cursor = conn.execute('SELECT * FROM brokers')
+        result = cursor.fetchall()
+        return result
+
+topic_list = list(get_subs())
+for i in range(len(topic_list)):
+	topic_list[i]=topic_list[i][0]
+print(topic_list)
+for x in ['apple', 'banana', 'cherry', 'date', 'elderberry']:
+	topic_list.append(x)
 class PublisherClient(tk.Tk):
-	
 	# __init__ function for class PublisherClient
 	def __init__(self, *args, **kwargs):
 		# __init__ function for class Tk
@@ -80,10 +116,31 @@ class PublisherClient(tk.Tk):
 		except:
 			self.frames[RegisterPage].write_error("something went wrong!!, Please try after some time")
 		
-	def publish_req(self):
-		pass
-	def somethinf():
-		pass
+	#Publish to broker
+	def publish_req(self,content,topic,title):
+		print(all_brokers_info())
+		print(topic)
+		b_port = int(broker_info(topic)[0])
+		print(b_port)
+		if b_port != 0:	
+			# Create a TCP connection to the receiver
+			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			sock.connect((host, b_port))
+			
+			# Create a JSON object
+			user['content'] = content
+			user['topic'] = topic
+			user['title'] = title
+			print(user)
+			json_data = json.dumps(user)
+			
+			# Send the JSON object to the receiver
+			sock.send(json_data.encode())
+			
+			# Close the connection
+			sock.close()
+		else:
+			self.frames[MainPage].notifyevent_m("Please try after some time")
 
 	
 #LoginPage
@@ -143,25 +200,57 @@ class RegisterPage(tk.Frame):
 class MainPage(tk.Frame):
 	def __init__(self, parent, controller):
 		tk.Frame.__init__(self, parent)
+		# Create a StringVar variable to bind to the search box
+		self.search_box_var = tk.StringVar()
 		#Heading
-		ttk.Label(self, text ="Main Page", font = LARGEFONT).grid(row = 0, column=0,sticky = "nswe")	
+		self.tooltip_l = ttk.Label(self, text ="Main Page", font = LARGEFONT)
+		self.tooltip_l.pack(side="top")
 		#entries
-		self.tooltip_l = ttk.Label(self,font = ("Verdana", 20))
-		self.tooltip_l.grid(row = 1, column = 0, padx = 10, pady = 10,sticky = "nsew")
-		text_m = tk.Text(self, wrap=None)
-		text_m.grid(row = 2, column = 0,sticky='nsew')
-
-		yscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=text_m.yview)
-		yscrollbar.grid(row=2, column=1, sticky='nsw')
-		text_m.configure(yscrollcommand=yscrollbar.set)
-		ttk.Button(self, text="LogOut",command = lambda : controller.show_frame(LoginPage)).grid(row = 0, column = 1, padx = 10, pady = 10)
+		self.search_box = ttk.Entry(self,font = ("Verdana", 12),textvariable=self.search_box_var)
+		self.search_box.pack(side="top")
+	
+		# Create the listbox to display search results
+		self.results_box = tk.Listbox(self,yscrollcommand=True,height=2,selectmode=tk.SINGLE)
+		self.results_box.pack(expand=0)
+		self.results_box.delete(0, tk.END)
+		tk.Label(self,text="Title",font = ("Verdana", 15)).pack(side="top")
+		self.title_m = tk.Entry(self,font = ("Verdana", 12),xscrollcommand=True,width=50)
+		self.title_m.pack(side="top")
+		self.text_m = scrolledtext.ScrolledText(self)
+		self.text_m.pack()
+		ttk.Button(self, text="LogOut",command = lambda : controller.show_frame(LoginPage)).pack(side="right")
 		ttk.Button(self, text="Publish",
-		command = lambda : controller.publish_req()).grid(row = 6, column = 0, padx = 10, pady = 10)
+		command = lambda : controller.publish_req(self.text_m.get("1.0",'end-1c'),self.results_box.get(self.results_box.curselection()),self.title_m.get())).pack(side="right")
 		
+		self.notify_m = ttk.Label(self,font = ("Verdana", 15))
+		self.notify_m.pack(side="bottom")
+		
+		# Bind the StringVar variable to the search function
+		self.search_box_var.trace('w', self.update_search_results)
+		
+	
+	def update_search_results(self, *args):
+	    # Get the search string from the search box variable
+	    search_str = self.search_box_var.get()
+	
+	    # Filter the items list to find matches
+	    matches = [item for item in topic_list if search_str.lower() in item.lower()]
+	
+	    # Clear the current contents of the listbox
+	    self.results_box.delete(0, tk.END)
+	
+	    # Add the matches to the listbox
+	    for match in matches:
+	        self.results_box.insert(tk.END, match)
+			
+
 		
 	def write_uname(self,name):
 		self.tooltip_l.config(text="Welcome "+name,foreground="red")
+	def notifyevent_m(self,msg):
+		self.notify_m.config(text=msg,foreground="red")
 		
 # Driver Code
 app = PublisherClient()
 app.mainloop()
+
